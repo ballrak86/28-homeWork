@@ -1,0 +1,105 @@
+---
+- name: Install and configure
+  hosts: web
+  become: yes
+
+  tasks:
+    - name: Add epel-release repo
+      dnf:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        state: present
+
+    - name: Install a list of packages
+      dnf:
+        name:
+          - nginx
+          - python3-devel
+          - python3-pip
+          - python3-virtualenv
+          - sqlite-devel
+          - net-tools
+          - git
+          - npm
+        state: present
+
+    - name: Put SELinux in permissive mode, logging actions that would be blocked.
+      selinux:
+        policy: targeted
+        state: permissive
+
+    - name: copy file
+      copy:
+        src: "{{ item }}"
+        dest: /var/www/html/
+        owner: nginx
+        group: nginx
+        directory_mode: yes
+      with_items:
+        - 'files/django-helloworld'
+        - 'files/go-http-hello-world'
+        - 'files/react-helloworld'
+
+    - pip:
+        name: django==2.2.3
+        executable: pip3
+
+    - file:
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      with_items:
+        - { dest: '/var/www/html/go-http-hello-world/hello_world/hello_world', mode: '0755' }
+        - { dest: '/var/www/html/django-helloworld/manage.py', mode: 'a+x' }
+        - { dest: '/var/www/', mode: '0775' }
+        - { dest: '/var/www/html/', mode: '0775' }
+
+
+    - django_manage:
+        command: migrate
+        app_path: '/var/www/html/django-helloworld'
+
+    - file:
+        dest: "/var/www/html/react-helloworld/"
+        mode: 0777
+        recurse: yes
+
+    - name: copy config
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - { src: 'files/django.service', dest: '/etc/systemd/system/' }
+        - { src: 'files/go.service', dest: '/etc/systemd/system/' }
+        - { src: 'files/nginx/nginx.conf', dest: '/etc/nginx/' }
+        - { src: 'files/nginx/conf.d/go.conf', dest: '/etc/nginx/conf.d/' }
+        - { src: 'files/nginx/conf.d/django.conf', dest: '/etc/nginx/conf.d/' }
+        - { src: 'files/nginx/conf.d/react.conf', dest: '/etc/nginx/conf.d/' }
+      notify:
+      - restart all services
+
+    - name: daemon started
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+      with_items:
+        - django
+        - go
+        - nginx
+
+    - name: daemon stop
+      systemd:
+        name: firewalld
+        state: stopped
+
+  handlers:
+  - name: restart all services
+    service:
+      name: "{{ item }}"
+      state: restarted
+    with_items:
+      - go
+      - django
+      - nginx

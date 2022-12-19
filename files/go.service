@@ -1,0 +1,11 @@
+[Unit]
+Description=Go
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/var/www/html/go-http-hello-world/hello_world
+ExecStart=/var/www/html/go-http-hello-world/hello_world/hello_world
+
+[Install]
+WantedBy=multi-user.target
