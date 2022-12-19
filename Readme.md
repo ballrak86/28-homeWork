@@ -9,17 +9,17 @@
 
 1. GO
 
-![Image 1](https://github.com/ballrak86/27-homeWork/blob/main/screenshots/go.jpg) 
+![Image 1](https://github.com/ballrak86/28-homeWork/blob/main/screenshots/go.jpg) 
 
 --------
 2. React
 
-![Image 2](https://github.com/ballrak86/27-homeWork/blob/main/screenshots/react.jpg) 
+![Image 2](https://github.com/ballrak86/28-homeWork/blob/main/screenshots/react.jpg) 
 
 --------
 3. Django
 
-![Image 3](https://github.com/ballrak86/27-homeWork/blob/main/screenshots/django.jpg) 
+![Image 3](https://github.com/ballrak86/28-homeWork/blob/main/screenshots/django.jpg) 
 
 ## Как запустить:
  ```
